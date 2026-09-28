@@ -1,10 +1,10 @@
 
 SYSROOT ?= ./sysroot
 ARCH ?= armv8-m
-INSTALL_DIR = $(SYSROOT)/usr/bin
+INSTALL_DIR = $(SYSROOT)/bin
 ETC_INSTALL_DIR = $(SYSROOT)/etc
 
-include $(SYSROOT)/usr/lib/libc.mk
+-include $(SYSROOT)/lib/libc.mk
 
 CFLAGS += -Os
 LDFLAGS += -Os
@@ -22,8 +22,9 @@ all: clean install
 
 install: init
 	mkdir -p $(INSTALL_DIR)
+	mkdir -p $(ETC_INSTALL_DIR)
 	mv init $(INSTALL_DIR)/init
-	mv initrc $(ETC_INSTALL_DIR)/initrc
+	cp initrc $(ETC_INSTALL_DIR)/initrc
 
 clean:
 	rm -f *.o *.elf
