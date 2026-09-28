@@ -16,10 +16,10 @@
 
 static char path_buff[32];
 
-int exit;
+int shell_exit;
 
 int builtin_exit(int argc, char** argv) {
-    exit = 1;
+    shell_exit = 1;
     return 0;
 }
 
@@ -120,8 +120,8 @@ char line_buff[32];
 
 int builtin_sh(int argc, char** argv)
 {
-    exit = 0;
-    while (exit == 0) {
+    shell_exit = 0;
+    while (shell_exit == 0) {
         puts("# ");
         memset(line_buff, 0, sizeof(line_buff));
         if (read(STDIN_FILENO, line_buff, sizeof(line_buff)) == 0) break; //CTRL+D
