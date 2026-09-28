@@ -1,6 +1,6 @@
 #pragma once
 
-#define SHELL_BUILTIN_COUNT 7
+#define SHELL_BUILTIN_COUNT 8
 #define BUILTIN_COUNT 9
 
 extern char line_buff[32];
@@ -12,10 +12,11 @@ int builtin_cat(int argc, char** argv);
 int builtin_ls(int argc, char** argv);
 int builtin_uname(int argc, char** argv);
 int builtin_kill(int argc, char** argv);
+int builtin_help(int argc, char** argv);
 
 int builtin_sh(int argc, char** argv);
-int builtin_getty(int argc, char** argv);
 
+void show_help(int command);
 char* strip_path(char* str); 
 int get_builtin_index(const char* name); 
 int execute_builtin(int index, int argc, char** argv);
