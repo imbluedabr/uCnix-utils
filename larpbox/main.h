@@ -2,7 +2,7 @@
 
 #define SHELL_BUILTIN_COUNT 8
 #define BUILTIN_COUNT 9
-
+extern const char builtin_names[][BUILTIN_COUNT]; 
 extern char line_buff[32];
 
 int builtin_exit(int argc, char** argv);
@@ -16,7 +16,7 @@ int builtin_help(int argc, char** argv);
 
 int builtin_sh(int argc, char** argv);
 
-void show_help(int command);
+void show_help(const char* command);
 char* strip_path(char* str); 
 int get_builtin_index(const char* name); 
 int execute_builtin(int index, int argc, char** argv);

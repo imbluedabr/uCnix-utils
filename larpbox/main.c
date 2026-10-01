@@ -9,6 +9,7 @@
 #include <signal.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <libgen.h>
 #include <string.h>
 
 const char builtin_names[][BUILTIN_COUNT] = {
@@ -65,6 +66,7 @@ int main(int argc, char** argv) {
     if (argc == 0) {
         return builtin_sh(argc, argv);
     }
+	argv[0] = basename(argv[0]);
 
     if (strcmp(argv[0], "larpbox") == 0) {
         argv = &argv[1];

@@ -24,6 +24,12 @@ int builtin_exit(int argc, char** argv) {
 }
 
 int builtin_pwd(int argc, char** argv) {
+	if (argc == 2) {
+		if (strcmp(argv[1], "-?") == 0) {
+			show_help("pwd");
+			return 0;
+		}
+	}
     printf("%s\n", getcwd(path_buff, sizeof(path_buff)));
     return 0;
 }
@@ -33,6 +39,10 @@ int builtin_cd(int argc, char** argv) {
         puts("cd: invalid argument(s)\n");
         return -1;
     }
+	if (strcmp(argv[1], "-?") == 0) {
+		show_help("cd");
+		return 0;
+	}
     int status = chdir(argv[1]);
 
     if (status == -ENOENT) {
@@ -55,14 +65,17 @@ char* strip_path(char* str) {
     return word;
 }
 
-int spawn_command(const char* path, char** argv) {
-    argv[0] = strip_path(argv[0]);
+int spawn_command(char** argv) {
     fd_set fds;
     FD_ZERO(fds);
     FD_SET(STDIN_FILENO, fds);
     FD_SET(STDOUT_FILENO, fds);
     FD_SET(STDERR_FILENO, fds);
-    pid_t pid = spawn(path, &fds, (const char**) argv);
+	for (int i = 0; argv[i] != NULL; i++) {
+		printf("arg%d: %s\n", i, argv[i]);
+	}
+    pid_t pid = spawn(argv[0], &fds, (const char**) argv);
+	printf("path: %s, pid: %d\n", argv[0], pid);
     if (pid < 0) return pid;
     setpgid(pid, pid);
     kill(pid, SIGCONT);
@@ -97,12 +110,13 @@ void execute_command(char* buffer)
         execute_builtin(builtin, argc, arg_vec);
         return;
     }
-
-    pid_t pid = spawn_command(arg_vec[0], arg_vec);
+	
+    pid_t pid = spawn_command(arg_vec);
     if (pid < 0) {
         memset(path_buff, 0, sizeof(path_buff));
         snprintf(path_buff, sizeof(path_buff), "/bin/%s", arg_vec[0]);
-        pid = spawn_command(path_buff, arg_vec);
+		arg_vec[0] = path_buff;
+        pid = spawn_command(arg_vec);
     }
     
     if (pid < 0) {

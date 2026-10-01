@@ -37,7 +37,10 @@ int builtin_uname(int argc, char** argv)
             options |= KVER;
         } else if (strcmp(arg, "-m") == 0) {
             options |= MACH;
-        }
+        } else if (strcmp(arg, "-?") == 0) {
+        	show_help("uname");
+			return 0;
+		}
     }
     if (options == 0) options = KNAME;
     struct utsname ubuff;

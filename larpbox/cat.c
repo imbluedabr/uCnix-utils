@@ -21,8 +21,12 @@ static char data_buff[256];
 int builtin_cat(int argc, char** argv)
 {
     int index = 1;
-
+	
     do {
+		if (strcmp(argv[index], "-?") == 0) {
+			show_help("cat");
+			break;
+		}
         int fd = STDIN_FILENO;
         if (argc > 1) {
             fd = open(argv[index++], O_RDONLY);

@@ -2,7 +2,7 @@
 SYSROOT ?= ./sysroot
 ARCH ?= armv8-m
 INSTALL_DIR =$(SYSROOT)/bin
-STACK_SIZE = 0x380
+STACK_SIZE = 0x200
 -include $(SYSROOT)/lib/libc.mk
 
 CFLAGS += -Os

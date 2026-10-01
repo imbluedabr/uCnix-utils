@@ -31,6 +31,9 @@ int builtin_ls(int argc, char** argv)
             options |= LS_LIST;
         } else if (strcmp(arg, "-la") == 0) {
             options |= LS_LIST | LS_ALL;
+		} else if (strcmp(arg, "-?") == 0) {
+			show_help("ls");
+			return 0;
         } else if (path == NULL) {
             path = arg;
         } else {

@@ -20,6 +20,9 @@ int builtin_kill(int argc, char** argv)
         char* arg = argv[i];
         if (strcmp(arg, "-s") == 0) {
             sig = atoi(argv[++i]);
+		} else if (strcmp(arg, "-?") == 0) {
+			show_help("kill");
+			return 0;
         } else {
             pid_t pid = atoi(argv[i]);
             kill(pid, sig);
