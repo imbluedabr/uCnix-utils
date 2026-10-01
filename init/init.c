@@ -13,36 +13,25 @@
 #include <string.h>
 #include <stdbool.h>
 
-char* strip_path(char* str) {
-    char* word = str;
-    while(*str) {
-        if (*str == '/') {
-            memset(word, 0, 1 + str - word);
-            word = str + 1;
-        }
-        str++;
-    }
-    return word;
-}
+typedef struct {
+	char line[32];
+	enum {
+		SESS_ONESHOT,
+		SESS_RESTART
+	} type;  //0: oneshot, 1: restart
+	char tty[8];
+	pid_t pid;
+} session_t;
 
-pid_t start_program(char** argv) {
-    static char path[32];
-    strlcpy(path, argv[0], 31);
-    argv[0] = strip_path(argv[0]);
-    fd_set fds;
-    FD_ZERO(fds);
-    FD_SET(STDIN_FILENO, fds);
-    FD_SET(STDOUT_FILENO, fds);
-    FD_SET(STDERR_FILENO, fds);
-    return spawn(path, &fds, (const char**)argv);
-}
-
-uint8_t session_list[8];
+session_t sessions[8];
 int session_count;
+static char text_buff[64];
 
 
-void parse_line(char *line) {
-    char *arg_vec[8];
+//parse line in the initrc
+//tty:type:command
+void parse_line(char* line) {
+    char *arg_vec[4];
     int arg_cnt = 0;
     char *p = line;
     char *start = p;
@@ -56,18 +45,88 @@ void parse_line(char *line) {
         p++;
     }
 
-    if (*start)
-        arg_vec[arg_cnt++] = start;
+    if (*start) {
+		arg_vec[arg_cnt++] = start;
+	}
 
-    arg_vec[arg_cnt] = NULL;
-    pid_t sess = start_program(arg_vec);
-    printf("init: sess=%d\n", sess);
-    if (sess > 0) {
-        session_list[session_count++] = sess;
-    }
+	arg_vec[arg_cnt] = NULL;
+
+	if (arg_cnt < 3) return;
+	session_t* sess = &sessions[session_count++];
+
+	strlcpy(sess->tty, arg_vec[0], 7);
+
+	if (strcmp(arg_vec[1], "oneshot") == 0) {
+		sess->type = SESS_ONESHOT;
+	} else if (strcmp(arg_vec[1], "restart") == 0) {
+		sess->type = SESS_RESTART;
+	}
+	
+	strlcpy(sess->line, arg_vec[2], 31);
+
+	printf("sess: tty=%s, type=%s, command=%s\n", sess->tty, arg_vec[1], sess->line);
 }
 
 
+//start a session
+void start_session(session_t* sess) {
+    char *arg_vec[4];
+    int arg_cnt = 0;
+    char *p = sess->line;
+    char *start = p;
+
+    while (*p) {
+        if (*p == ' ') {
+            *p = '\0';
+            arg_vec[arg_cnt++] = start;
+            start = p + 1;
+        }
+        p++;
+    }
+
+    if (*start) {
+        arg_vec[arg_cnt++] = start;
+	}
+	arg_vec[arg_cnt] = NULL;
+	
+	//tty the process is attached to;
+	snprintf(text_buff, 32, "/dev/%s", sess->tty);
+	int stdin = open(text_buff, O_RDWR);
+	if (stdin < 0) {
+		printf("init: failed to open tty\n");
+		return;
+	}
+	int stdout = fcntl(stdin, F_DUPFD, 0);
+	int stderr = fcntl(stdin, F_DUPFD, 0);
+	
+	//executable to run
+    fd_set fds;
+    FD_ZERO(fds);
+    FD_SET(stdin, fds);
+    FD_SET(stderr, fds);
+    FD_SET(stderr, fds);
+    pid_t pid = spawn(arg_vec[0], &fds, (const char**)arg_vec);
+	printf("init: sess=%d\n", pid);
+	sess->pid = pid;
+
+	if (pid > 0) {
+		struct utsname ubuff;
+		uname(&ubuff);
+		snprintf(text_buff, 64, "%s %s %s %s %s (%s)\n\n", ubuff.sysname, ubuff.nodename, ubuff.release, ubuff.version, ubuff.machine, sess->tty);
+		write(stdout, text_buff, strlen(text_buff));
+
+		kill(pid, SIGCONT);
+	}
+	close(stdin);
+	close(stdout);
+	close(stderr);
+
+	if (sess->type == SESS_ONESHOT) { //oneshot so we have to wait for it to be finished
+		int wstatus;
+		waitpid(pid, &wstatus, 0);
+		sess->pid = 0;
+	}
+}
 
 int main(int argc, char** argv)
 {
@@ -76,16 +135,16 @@ int main(int argc, char** argv)
             kill(1, SIGKILL);
             return 0;
         }
+		return 1;
     }
-
-    puts("init: starting sessions\n");
 
     int inittab = open("/etc/initrc", O_RDONLY);
     if (inittab < 0) {
         puts("init: cant open initrc\n");
-        return -1;
+        return 1;
     }
-
+	
+	//parse initrc
     char buf[64];
     char line[32];
     int line_len = 0;
@@ -111,13 +170,26 @@ int main(int argc, char** argv)
 
     close(inittab);
     
-    if (session_count == 0) return -1;
-    puts("init: starting reaper loop\n");
+    if (session_count == 0) return 1;
+
+	
+
+    puts("init: starting sessions\n");
     for (int i = 0; i < session_count; i++) {
-        kill(session_list[i], SIGCONT);
+		session_t* sess = &sessions[i];
+		start_session(sess);
     }
     
-    while(waitpid(-1, NULL, 0) > 0);
+	int wstatus;
+	int pid;
+    while((pid = waitpid(-1, &wstatus, 0)) > 0) {
+    	for (int i = 0; i < session_count; i++) {
+    		session_t* sess = &sessions[i];
+			if (sess->pid == pid && sess->type == SESS_RESTART) {
+				start_session(sess);
+			}
+		}
+	}
     
     return 0;
 }

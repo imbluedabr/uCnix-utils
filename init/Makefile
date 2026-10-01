@@ -24,7 +24,6 @@ install: init
 	mkdir -p $(INSTALL_DIR)
 	mkdir -p $(ETC_INSTALL_DIR)
 	mv init $(INSTALL_DIR)/init
-	cp initrc $(ETC_INSTALL_DIR)/initrc
 
 clean:
 	rm -f *.o *.elf
