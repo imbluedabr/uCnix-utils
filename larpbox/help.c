@@ -10,24 +10,25 @@ static const char* const help_strings[] = {
 	"uname [OPTION]...\nPrint system info to stdout.\nOptions:\n\t-a\tshow all information\n\t-s\tkernel name\n\t-n\tnetwork node hostname\n\t-r\tkernel release\n\t-v\tkernel version\n\t-m\tmachine\n",
 	"kill [-s signal] [PID]...\nSend signal to a process.\n",
 	"help [COMMAND]\nShow command info.\n",
+	"ps\nShow processes.\n",
+	"free [OPTION]\nShow memory usage.\nOptions:\n\t-h\thuman readable format\n",
 	"sh\nStandard system shell.\n"
 };
 
-void show_help(const char* command) {
-	int n = get_builtin_index(command);
-	if (n >= BUILTIN_COUNT || n < 0) {
+void show_help(int command) {
+	if (command >= BUILTIN_COUNT || command < 0) {
 		printf("help: no such command\n");
 		return;
 	}
-	printf("Usage: %s\n", help_strings[n]);
+	printf("Usage: %s\n", help_strings[command]);
 }
 
 int builtin_help(int argc, char **argv) {
 	if (argc == 2) {
-		show_help(argv[1]);
+		show_help(get_builtin_index(argv[1]));
 	} else {
 		for (int i = 0; i < BUILTIN_COUNT; i++) {
-			show_help(builtin_names[i]);
+			show_help(i);
 		}
 	}
 	return 0;

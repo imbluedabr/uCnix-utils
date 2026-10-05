@@ -24,7 +24,7 @@ int builtin_cat(int argc, char** argv)
 	
     do {
 		if (strcmp(argv[index], "-?") == 0) {
-			show_help("cat");
+			show_help(4);
 			break;
 		}
         int fd = STDIN_FILENO;

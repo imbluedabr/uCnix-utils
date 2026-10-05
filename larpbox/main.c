@@ -21,6 +21,8 @@ const char builtin_names[][BUILTIN_COUNT] = {
     "uname",
     "kill",
 	"help",
+	"ps",
+	"free",
 
     "sh"
 };
@@ -53,6 +55,10 @@ int execute_builtin(int index, int argc, char** argv) {
         case 7:
 			return builtin_help(argc, argv);
         case 8:
+			return builtin_ps(argc, argv);
+		case 9:
+			return builtin_free(argc, argv);
+		case 10:
             return builtin_sh(argc, argv);
         default:
             return -1;

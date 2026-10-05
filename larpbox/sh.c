@@ -26,7 +26,7 @@ int builtin_exit(int argc, char** argv) {
 int builtin_pwd(int argc, char** argv) {
 	if (argc == 2) {
 		if (strcmp(argv[1], "-?") == 0) {
-			show_help("pwd");
+			show_help(3);
 			return 0;
 		}
 	}
@@ -40,7 +40,7 @@ int builtin_cd(int argc, char** argv) {
         return -1;
     }
 	if (strcmp(argv[1], "-?") == 0) {
-		show_help("cd");
+		show_help(2);
 		return 0;
 	}
     int status = chdir(argv[1]);

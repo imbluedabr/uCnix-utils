@@ -22,7 +22,7 @@ int builtin_ls(int argc, char** argv)
     int dir;
     int options = 0;
     const char* path = NULL;
-    
+
     for (int i = 1; i < argc; i++) {
         char* arg = argv[i];
         if (strcmp(arg, "-a") == 0) {
@@ -32,7 +32,7 @@ int builtin_ls(int argc, char** argv)
         } else if (strcmp(arg, "-la") == 0) {
             options |= LS_LIST | LS_ALL;
 		} else if (strcmp(arg, "-?") == 0) {
-			show_help("ls");
+			show_help(1);
 			return 0;
         } else if (path == NULL) {
             path = arg;

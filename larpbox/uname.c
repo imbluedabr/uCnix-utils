@@ -38,7 +38,7 @@ int builtin_uname(int argc, char** argv)
         } else if (strcmp(arg, "-m") == 0) {
             options |= MACH;
         } else if (strcmp(arg, "-?") == 0) {
-        	show_help("uname");
+        	show_help(5);
 			return 0;
 		}
     }
