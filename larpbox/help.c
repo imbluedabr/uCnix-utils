@@ -12,6 +12,8 @@ static const char* const help_strings[] = {
 	"help [COMMAND]\nShow command info.\n",
 	"ps\nShow processes.\n",
 	"free [OPTION]\nShow memory usage.\nOptions:\n\t-h\thuman readable format\n",
+	"led [on | off]\nTogle system led.\n",
+	"i2c_scan [FILE]...\nScan i2c busses\n",
 	"sh\nStandard system shell.\n"
 };
 

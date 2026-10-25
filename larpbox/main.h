@@ -1,8 +1,8 @@
 #pragma once
 
 #include <stdint.h>
-#define SHELL_BUILTIN_COUNT 10
-#define BUILTIN_COUNT 11
+#define SHELL_BUILTIN_COUNT 12
+#define BUILTIN_COUNT 13
 extern const char builtin_names[][BUILTIN_COUNT]; 
 extern char line_buff[32];
 
@@ -16,6 +16,8 @@ int builtin_kill(int argc, char** argv);
 int builtin_help(int argc, char** argv);
 int builtin_ps(int argc, char** argv);
 int builtin_free(int argc, char** argv);
+int builtin_led(int argc, char** argv);
+int builtin_i2c_scan(int argc, char** argv);
 int builtin_sh(int argc, char** argv);
 
 

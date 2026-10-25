@@ -23,8 +23,9 @@ const char builtin_names[][BUILTIN_COUNT] = {
 	"help",
 	"ps",
 	"free",
-
-    "sh"
+	"led",
+	"i2c_scan",
+	"sh"
 };
 
 int get_builtin_index(const char* name) {
@@ -59,7 +60,9 @@ int execute_builtin(int index, int argc, char** argv) {
 		case 9:
 			return builtin_free(argc, argv);
 		case 10:
-            return builtin_sh(argc, argv);
+			return builtin_led(argc, argv);
+		case 11:
+			return builtin_i2c_scan(argc, argv);
         default:
             return -1;
     }

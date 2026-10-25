@@ -123,7 +123,7 @@ void execute_command(char* buffer)
         printf("sh: %s: command not found\n", arg_vec[0]);
     } else {
         int wstatus;
-        waitpid(pid, &wstatus, 0);
+       	waitpid(-1, &wstatus, 0);
 
         printf("exit: %d\n", wstatus);
     }
